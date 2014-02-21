@@ -17,6 +17,8 @@ class Main {
 	    				b.inputPoint(i,j,s.nextInt());
 				}
 			}
+			
+			s.close();
 		} catch (FileNotFoundException e) {
 			System.out.print("Cannot find file Wrong\n");
 		}

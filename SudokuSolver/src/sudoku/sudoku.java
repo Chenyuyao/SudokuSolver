@@ -5,6 +5,7 @@ import java.lang.Math;
 class Val {
 	public int n;
 	public int[] possible = new int[9];
+	boolean known; //isn't used for solver algorithm, used for UI design in the future
 	
 	Val() {
 		n = 0;
@@ -12,12 +13,13 @@ class Val {
 
 	public void set(int num ) {
 		n = num;
+		known = true;
 	}
 	
 	public void fill(int num) {
 		n = num;
+		known = false;
 	}
-
 }
 
 
@@ -163,17 +165,16 @@ class Board {
 	}
 
 
-	//method for B + FC + H
-	void solve() {
-		Stack seq = new Stack();
-		Stack forb= new Stack();
+	public void solve() {
+		Stack<Integer> seq = new Stack<Integer>();
+		Stack<Integer> forb= new Stack<Integer>();
 
 		int record = 0;
 		init();
 
 		int x=0,y=0;
 		while(!complete()) {
-			//choose Most constrained varable
+			//choose Most constrained variable (the blank with smallest possible value
 			int min;
 			min = 10;
 			for (int i = 0; i < 9; i++) {
@@ -186,7 +187,7 @@ class Board {
 			}
 
 			if (min > 0) {
-				//choose least constraining value
+				//choose least constraining value (choose the value affect other raw,colum,basket less
 				int minVal = 81;
 				int toFill = 0;
 				for (int i = 0; i < 9; i++) {
@@ -204,17 +205,20 @@ class Board {
 				if (res == 0) System.out.print("Cannot fill");
 				init();
 
-				//push value into stack
+				//push value into stack: suppose filled 3 in (1,8) then push 318 to stack
+				//this make sense since 0 < toFill < 10 and x < 9, y < 9
 				seq.push( toFill*100 + x*10 + y ); 
 				forb.push( record );               
 				record = 0;
 			}
-			else {   //min == 0 and for x y, has no value to fill
+			else {   
+				//min == 0 and for x y, has no value to fill. ==> Backtrack
 				int nxy = (int)seq.pop(); 	//e.x 318 -> in (1,8) fill in 3
 				int forbidVal = nxy / 100; 	// 318/100 = 3
-				x = nxy / 10 % 10; 		// 318/10 = 31   31%10 = 1
-				y = nxy % 10;			// 318%10= 8
-	
+				x = nxy / 10 % 10; 			// 318/10 = 31   31%10 = 1
+				y = nxy % 10;				// 318%10= 8
+				
+				//record is a buffer to store failure value under this branch
 				record = (int)forb.pop();
 				record = record * 10 + forbidVal;  //full record for forbiden value in x,y
 	
@@ -231,7 +235,6 @@ class Board {
 			}
 		}
 	}
-		
 }
 
 
